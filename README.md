@@ -1,3 +1,9 @@
+##PermissionDispatcher
+rewrite the <a href="https://github.com/hotchemi/PermissionsDispatcher">PermissionsDispatcher<a/> for Java
+
+
+
+
 ## Licence
 
 ```

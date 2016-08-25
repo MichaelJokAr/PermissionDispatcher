@@ -4,8 +4,10 @@ import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
 
 import org.jokar.permissiondispatcher.annotation.RuntimePermissions;
-import org.jokar.permissiondispatcher.processor.Interface.TypeResolver;
+import org.jokar.permissiondispatcher.processor.event.TypeResolver;
+import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.getAnnotatedClasses;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -28,6 +30,7 @@ public class PermissionsProcessor extends AbstractProcessor implements TypeResol
 
     private Types mTypes;
     private Elements mElements;
+
     private Filer mFiler;
     private Messager mMessager;
 
@@ -42,7 +45,11 @@ public class PermissionsProcessor extends AbstractProcessor implements TypeResol
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        return false;
+        List<RuntimePermissionsElement> elements = getAnnotatedClasses(roundEnv,this);
+        for(RuntimePermissionsElement element :elements){
+
+        }
+        return true;
     }
 
     @Override

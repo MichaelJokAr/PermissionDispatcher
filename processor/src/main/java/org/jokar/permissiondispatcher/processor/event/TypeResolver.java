@@ -1,4 +1,4 @@
-package org.jokar.permissiondispatcher.processor.Interface;
+package org.jokar.permissiondispatcher.processor.event;
 
 import javax.lang.model.type.TypeMirror;
 
