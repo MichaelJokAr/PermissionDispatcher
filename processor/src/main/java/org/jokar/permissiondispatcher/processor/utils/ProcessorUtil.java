@@ -1,5 +1,7 @@
 package org.jokar.permissiondispatcher.processor.utils;
 
+import com.squareup.javapoet.CodeBlock;
+
 import org.jokar.permissiondispatcher.annotation.NeedsPermission;
 import org.jokar.permissiondispatcher.annotation.OnNeverAskAgain;
 import org.jokar.permissiondispatcher.annotation.OnPermissionDenied;
@@ -22,6 +24,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.deepEquals;
@@ -140,9 +143,39 @@ public final class ProcessorUtil {
         return ConstantsProvider.REQUEST_CODE_PREFIX + element.getSimpleName().toString().toUpperCase();
     }
 
-    public static String permissionFieldName(ExecutableElement element){
+    public static String permissionFieldName(ExecutableElement element) {
 
         return ConstantsProvider.PERMISSION_PREFIX + element.getSimpleName().toString().toUpperCase();
 
+    }
+
+    public static String pendingRequestFieldName(ExecutableElement element) {
+        return ConstantsProvider.GEN_PENDING_PREFIX + element.getSimpleName().toString().toUpperCase();
+    }
+
+
+    public static String permissionRequestTypeName(ExecutableElement element) {
+        return toUpperCaseFirstOne(element.getSimpleName().toString()) + ConstantsProvider.GEN_PERMISSIONREQUEST_SUFFIX;
+    }
+
+    //首字母转大写
+    private static String toUpperCaseFirstOne(String s) {
+        if (Character.isUpperCase(s.charAt(0)))
+            return s;
+        else
+            return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
+    }
+
+    public static CodeBlock varargsParametersCodeBlock(ExecutableElement needsElement) {
+        CodeBlock.Builder varargsCall = CodeBlock.builder();
+        List<? extends VariableElement> parameters = needsElement.getParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            VariableElement variableElement = parameters.get(i);
+            varargsCall.add("$L", variableElement.getSimpleName().toString());
+            if (i < parameters.size() - 1) {
+                varargsCall.add(", ");
+            }
+        }
+        return varargsCall.build();
     }
 }

@@ -2,11 +2,14 @@ package org.jokar.permissiondispatcher.processor;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
+import com.squareup.javapoet.JavaFile;
 
 import org.jokar.permissiondispatcher.annotation.RuntimePermissions;
 import org.jokar.permissiondispatcher.processor.event.TypeResolver;
+
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.getAnnotatedClasses;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +24,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 
 /**
  * Created by JokAr on 16/8/23.
@@ -45,9 +49,15 @@ public class PermissionsProcessor extends AbstractProcessor implements TypeResol
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        List<RuntimePermissionsElement> elements = getAnnotatedClasses(roundEnv,this);
-        for(RuntimePermissionsElement element :elements){
-
+        List<RuntimePermissionsElement> elements = getAnnotatedClasses(roundEnv, this);
+        for (RuntimePermissionsElement element : elements) {
+            JavaFile javaFile = JavaFileBuilder.createJavaFile(element, this);
+            try {
+                javaFile.writeTo(mFiler);
+            } catch (IOException e) {
+                e.printStackTrace();
+                mMessager.printMessage(Diagnostic.Kind.ERROR, e.getMessage());
+            }
         }
         return true;
     }

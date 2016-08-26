@@ -34,8 +34,8 @@ import static java.util.Arrays.deepEquals;
  * Created by JokAr on 16/8/23.
  */
 public final class ValidatorUtils {
-    private final String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
-    private final String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
+    private static String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
+    private static String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
 
     public static ClassType checkActivity(TypeElement element, TypeResolver resolver) {
 
