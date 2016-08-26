@@ -1,6 +1,8 @@
 ##PermissionDispatcher
 rewrite the <a href="https://github.com/hotchemi/PermissionsDispatcher">PermissionsDispatcher<a/> for Java
+and add code for "Xiaomi" phone;
 
+It's not done;
 
 
 
