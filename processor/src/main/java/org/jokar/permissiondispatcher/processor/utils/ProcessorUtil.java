@@ -8,10 +8,8 @@ import org.jokar.permissiondispatcher.annotation.OnPermissionDenied;
 import org.jokar.permissiondispatcher.annotation.OnShowRationale;
 import org.jokar.permissiondispatcher.annotation.RuntimePermissions;
 import org.jokar.permissiondispatcher.processor.RuntimePermissionsElement;
-import org.jokar.permissiondispatcher.processor.event.ClassType;
 import org.jokar.permissiondispatcher.processor.event.ConstantsProvider;
 import org.jokar.permissiondispatcher.processor.event.TypeResolver;
-import org.jokar.permissiondispatcher.processor.exception.NoAnnotatedMethodsException;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -177,5 +175,9 @@ public final class ProcessorUtil {
             }
         }
         return varargsCall.build();
+    }
+
+    public static String withCheckMethodName(ExecutableElement element) {
+        return element.getSimpleName().toString() + ConstantsProvider.METHOD_SUFFIX;
     }
 }

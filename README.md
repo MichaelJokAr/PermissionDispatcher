@@ -2,9 +2,38 @@
 rewrite the <a href="https://github.com/hotchemi/PermissionsDispatcher">PermissionsDispatcher<a/> for Java
 and add code for "Xiaomi" phone;
 
-It's not done;
 
 
+## Download
+
+To add it to your project, include the following in your **project** `build.gradle` file:
+
+```groovy
+buildscript {
+  dependencies {
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+  }
+}
+```
+
+And on your **app module** `build.gradle`:
+
+`${latest.version}` is [![Download](https://api.bintray.com/packages/a10188755550/maven/permissiondispatcher/images/download.svg)](https://bintray.com/a10188755550/maven/permissiondispatcher/_latestVersion)
+
+```groovy
+apply plugin: 'android-apt'
+
+dependencies {
+  compile 'org.jokar:permissiondispatcher:${latest.version}'
+  apt 'org.jokar:permissiondispatcher-processor:${latest.version}'
+}
+
+repositories {
+    maven {
+        url 'https://dl.bintray.com/a10188755550/maven' 
+    }
+}
+```
 
 ## Licence
 

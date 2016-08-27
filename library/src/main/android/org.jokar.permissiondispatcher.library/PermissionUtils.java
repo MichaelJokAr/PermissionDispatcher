@@ -2,13 +2,17 @@ package org.jokar.permissiondispatcher.library;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Process;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.util.SimpleArrayMap;
+
 import static android.support.v4.content.PermissionChecker.checkSelfPermission;
+
 /**
  * Created by JokAr on 16/8/23.
  */
@@ -85,22 +89,61 @@ public class PermissionUtils {
 
     /**
      * Determine context has access to the given permission.
-     *
+     * <p>
      * This is a workaround for RuntimeException of Parcel#readException.
      * For more detail, check this issue https://github.com/hotchemi/PermissionsDispatcher/issues/107
      *
-     * @param context context
+     * @param context    context
      * @param permission permission
      * @return returns true if context has access to the given permission, false otherwise.
      * @see #hasSelfPermissions(Context, String...)
      */
     private static boolean hasSelfPermission(Context context, String permission) {
-        try {
-            return checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
-        } catch (RuntimeException t) {
-            return false;
+        switch (Build.MANUFACTURER) {
+            case "Xiaomi": {
+
+                return checkSelfPermissionForXiaomi(context, permission);
+
+            }
+            default: {
+
+                try {
+                    return checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
+                } catch (RuntimeException t) {
+                    return false;
+                }
+
+            }
         }
     }
+
+
+    /**
+     * "Xiaomi" phione is different others,need add AppOpsManager
+     * @param context
+     * @param permission
+     * @return
+     */
+    @TargetApi(23)
+    private static boolean checkSelfPermissionForXiaomi(Context context, String permission) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        int auth = ActivityCompat.checkSelfPermission(context, permission);
+
+        AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        int checkOp = appOpsManager.checkOp(AppOpsManager.permissionToOp(permission), Process.myUid(), context.getPackageName());
+
+        if (auth == PackageManager.PERMISSION_GRANTED && checkOp == AppOpsManager.MODE_ALLOWED) {
+            return true;
+        }
+        if (auth == PackageManager.PERMISSION_GRANTED && checkOp == AppOpsManager.MODE_IGNORED) {
+
+            return false;
+        }
+        return false;
+    }
+
 
     /**
      * Checks given permissions are needed to show rationale.

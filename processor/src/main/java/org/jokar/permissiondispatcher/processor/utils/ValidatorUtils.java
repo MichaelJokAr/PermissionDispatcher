@@ -1,9 +1,7 @@
 package org.jokar.permissiondispatcher.processor.utils;
 
-import org.jokar.permissiondispatcher.annotation.NeedsPermission;
 import org.jokar.permissiondispatcher.processor.RuntimePermissionsElement;
 import org.jokar.permissiondispatcher.processor.event.ClassType;
-import org.jokar.permissiondispatcher.processor.event.ConstantsProvider;
 import org.jokar.permissiondispatcher.processor.event.TypeResolver;
 import org.jokar.permissiondispatcher.processor.exception.DuplicatedValueException;
 import org.jokar.permissiondispatcher.processor.exception.MixPermissionTypeException;
@@ -28,7 +26,6 @@ import javax.lang.model.type.TypeKind;
 import static org.jokar.permissiondispatcher.processor.event.ClassType.getClassType;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.getValueFromAnnotation;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.isEmpty;
-import static java.util.Arrays.deepEquals;
 
 /**
  * Created by JokAr on 16/8/23.
@@ -38,7 +35,6 @@ public final class ValidatorUtils {
     private static String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
 
     public static ClassType checkActivity(TypeElement element, TypeResolver resolver) {
-
         ClassType classType = getClassType(element.getQualifiedName().toString(), resolver);
 
         if (classType == null) {
@@ -65,7 +61,7 @@ public final class ValidatorUtils {
 
     /**
      * Checks the return type of the elements in the provided list.
-     * <p>
+     * <p/>
      * Raises an exception if any element specifies a return type other than 'void'.
      */
     public static void checkMethodSignature(List<ExecutableElement> elements) {
@@ -83,7 +79,7 @@ public final class ValidatorUtils {
 
     /**
      * Checks the elements in the provided list annotated with an annotation against duplicate values.
-     * <p>
+     * <p/>
      * Raises an exception if any annotation value is found multiple times.
      */
     public static void checkDuplicatedValue(List<ExecutableElement> elements, Class clazz) {
@@ -110,7 +106,6 @@ public final class ValidatorUtils {
             }
 
             for (VariableElement variableElement : parameters) {
-
                 if (!classType.isSameType(variableElement.asType(), classType.typeMirrorOf(clazz))) {
                     throw new WrongParametersException(element, clazz);
                 }

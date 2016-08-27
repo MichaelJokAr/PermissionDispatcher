@@ -55,8 +55,7 @@ public class PermissionsProcessor extends AbstractProcessor implements TypeResol
             try {
                 javaFile.writeTo(mFiler);
             } catch (IOException e) {
-                e.printStackTrace();
-                mMessager.printMessage(Diagnostic.Kind.ERROR, e.getMessage());
+                error("Generate file failed, reason: %s", e.getMessage());
             }
         }
         return true;
@@ -91,5 +90,8 @@ public class PermissionsProcessor extends AbstractProcessor implements TypeResol
     public TypeMirror typeMirrorOf(String className) {
 
         return mElements.getTypeElement(className).asType();
+    }
+    private void error(String msg, Object... args) {
+        mMessager.printMessage(Diagnostic.Kind.ERROR, String.format(msg, args));
     }
 }

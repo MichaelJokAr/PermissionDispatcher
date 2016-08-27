@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 24
@@ -26,4 +26,11 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile project(':library')
     apt project(':processor')
+//    compile 'org.jokar:permissiondispatcher:2.0.5'
+//    apt 'org.jokar:permissiondispatcher-processor:2.0.5'
+}
+repositories {
+    maven {
+        url 'https://dl.bintray.com/a10188755550/maven' //指定自己的maven路径，在未将library加入的jcenter中前，这是必须的
+    }
 }

@@ -35,38 +35,38 @@ import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.findO
  * Created by JokAr on 16/8/23.
  */
 public class RuntimePermissionsElement {
-    private final String packageName;
+    private String packageName;
 
-    public final String className;
+    private String className;
     private String generatedClassName;
 
-    private final ClassType classType;
+    private ClassType classType;
 
     private TypeResolver mTypeResolver;
     private TypeName mTypeName;
     private List<TypeVariableName> typeVariables;
 
-    private final List<ExecutableElement> needsPermissionsMethods;
+    private List<ExecutableElement> needsPermissionsMethods;
 
-    private final List<ExecutableElement> showsRationaleMethods;
+    private List<ExecutableElement> showsRationaleMethods;
 
-    private final List<ExecutableElement> deniedPermissionMethods;
+    private List<ExecutableElement> deniedPermissionMethods;
 
-    private final List<ExecutableElement> neverAskMethods;
+    private List<ExecutableElement> neverAskMethods;
 
     public RuntimePermissionsElement(TypeElement element, TypeResolver resolver) {
         mTypeResolver = resolver;
         mTypeName = TypeName.get(element.asType());
         typeVariables = new ArrayList<>();
         List<? extends TypeParameterElement> typeParameters = element.getTypeParameters();
-        for(TypeParameterElement element1 : typeParameters){
+        for (TypeParameterElement element1 : typeParameters) {
             typeVariables.add(TypeVariableName.get(element1));
         }
         String claseName = element.getQualifiedName().toString();
         packageName = ProcessorUtil.getPackageName(claseName);
         className = ProcessorUtil.getClassName(claseName);
         classType = checkActivity(element, resolver);
-        generatedClassName = element.getSimpleName().toString()+ ConstantsProvider.GEN_CLASS_SUFFIX;
+        generatedClassName = element.getSimpleName().toString() + ConstantsProvider.GEN_CLASS_SUFFIX;
         needsPermissionsMethods = findMethods(element, NeedsPermission.class);
         validateNeedsMethods();
 

@@ -11,7 +11,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import org.jokar.permissiondispatcher.annotation.NeedsPermission;
-import org.jokar.permissiondispatcher.annotation.OnShowRationale;
 import org.jokar.permissiondispatcher.processor.event.ClassType;
 import org.jokar.permissiondispatcher.processor.event.ConstantsProvider;
 import org.jokar.permissiondispatcher.processor.event.TypeResolver;
@@ -27,17 +26,19 @@ import java.util.List;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
+//import static java.util.Arrays.deepEquals;
 
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.requestCodeFieldName;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.permissionFieldName;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.varargsParametersCodeBlock;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.getValueFromAnnotation;
+import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.withCheckMethodName;
 
 /**
  * Created by JokAr on 16/8/24.
  */
 public class JavaFileBuilder {
-    protected static ClassName PERMISSION_UTILS = ClassName.get("permissions.dispatcher", "PermissionUtils");
+    protected static ClassName PERMISSION_UTILS = ClassName.get("org.jokar.permissiondispatcher.library", "PermissionUtils");
     private static ClassName ACTIVITY_COMPAT = ClassName.get("android.support.v4.app", "ActivityCompat");
     private static String[] MANIFEST_WRITE_SETTING = new String[]{"android.permission.WRITE_SETTINGS"};
     private static String MANIFEST_SYSTEM_ALERT_WINDOW[] = new String[]{"android.permission.SYSTEM_ALERT_WINDOW"};
@@ -47,6 +48,7 @@ public class JavaFileBuilder {
     static {
         ADD_WITH_CHECK_BODY_MAP.put(MANIFEST_WRITE_SETTING, new WriteSettingsHelper());
         ADD_WITH_CHECK_BODY_MAP.put(MANIFEST_SYSTEM_ALERT_WINDOW, new SystemAlertWindowHelper());
+
     }
 
     /**
@@ -62,10 +64,11 @@ public class JavaFileBuilder {
     }
 
 
-    private static TypeSpec createTypeSpec(RuntimePermissionsElement element, TypeResolver typeResolver) {
+    private static TypeSpec createTypeSpec(RuntimePermissionsElement element,
+                                           TypeResolver typeResolver) {
         return TypeSpec.classBuilder(element.getGeneratedClassName())
                 .addModifiers(Modifier.FINAL)
-                .addFields(createFields(element.getNeedsPermissionsMethods(), typeResolver))
+                .addFields(createFields(element.getNeedsPermissionsMethods()))
                 .addMethod(createConstructor())
                 .addMethods(createWithCheckMethods(element))
                 .addMethods(createPermissionHandlingMethods(element))
@@ -85,6 +88,7 @@ public class JavaFileBuilder {
     private static List<MethodSpec> createWithCheckMethods(RuntimePermissionsElement element) {
         List<MethodSpec> methods = new ArrayList<>();
         for (ExecutableElement executableElement : element.getNeedsPermissionsMethods()) {
+            // For each @NeedsPermission method, create the "WithCheck" equivalent
             methods.add(createWithCheckMethod(element, executableElement));
         }
         return methods;
@@ -126,7 +130,7 @@ public class JavaFileBuilder {
 
         TypeSpec.Builder builder = TypeSpec.classBuilder(ProcessorUtil.permissionRequestTypeName(needsMethod))
                 .addTypeVariables(element.getTypeVariables())
-                .addSuperinterface(ClassName.get("permissions.dispatcher", superInterfaceName))
+                .addSuperinterface(ClassName.get("org.jokar.permissiondispatcher.library", superInterfaceName))
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
         // Add required fields to the target
@@ -165,9 +169,24 @@ public class JavaFileBuilder {
 
         String requestCodeField = ProcessorUtil.requestCodeFieldName(needsMethod);
         String[] value = needsMethod.getAnnotation(NeedsPermission.class).value();
+
+//        SensitivePermissionInterface sensitivePermissionInterface;
+//        if(deepEquals(value,MANIFEST_WRITE_SETTING)){
+//            sensitivePermissionInterface = new WriteSettingsHelper();
+//            sensitivePermissionInterface.addRequestPermissionsStatement(proceedMethod,
+//                    element.getClassType().getActivity(), requestCodeField);
+//        }else if(deepEquals(value,MANIFEST_SYSTEM_ALERT_WINDOW)){
+//            sensitivePermissionInterface = new SystemAlertWindowHelper();
+//            sensitivePermissionInterface.addRequestPermissionsStatement(proceedMethod,
+//                    element.getClassType().getActivity(), requestCodeField);
+//        }else {
+//            addRequestPermissionsStatement(proceedMethod, targetParam, permissionFieldName(needsMethod), requestCodeField, element.getClassType());
+//
+//        }
         if (ADD_WITH_CHECK_BODY_MAP.get(value) != null) {
             SensitivePermissionInterface sensitivePermissionInterface = ADD_WITH_CHECK_BODY_MAP.get(value);
-            sensitivePermissionInterface.addRequestPermissionsStatement(proceedMethod, element.getClassType().getActivity(), requestCodeField);
+            sensitivePermissionInterface.addRequestPermissionsStatement(proceedMethod,
+                    element.getClassType().getActivity(), requestCodeField);
         } else {
             addRequestPermissionsStatement(proceedMethod, targetParam, permissionFieldName(needsMethod), requestCodeField, element.getClassType());
         }
@@ -355,7 +374,7 @@ public class JavaFileBuilder {
         builder.endControlFlow();
 
         // Remove the temporary pending request field, in case it was used for a method with parameters
-        if (hasParameters) {
+        if (!hasParameters) {
             builder.addStatement("$N = null", ProcessorUtil.pendingRequestFieldName(needsMethod));
         }
         builder.addStatement("break");
@@ -366,7 +385,7 @@ public class JavaFileBuilder {
                                                     ExecutableElement method) {
         String targetParam = "target";
 
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(method.getSimpleName().toString() + ConstantsProvider.METHOD_SUFFIX)
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(withCheckMethodName(method))
                 .addTypeVariables(element.getTypeVariables())
                 .addModifiers(Modifier.STATIC)
                 .returns(TypeName.VOID)
@@ -413,7 +432,7 @@ public class JavaFileBuilder {
         builder.nextControlFlow("else");
 
         // Add the conditional for "OnShowRationale", if present
-        ExecutableElement onRationale = element.findOnRationaleForNeeds(needsMethod.getAnnotation(OnShowRationale.class).value());
+        ExecutableElement onRationale = element.findOnRationaleForNeeds(needsPermissionParameter);
         boolean hasParameters = needsMethod.getParameters().isEmpty();
         if (!hasParameters) {
             // If the method has parameters, precede the potential OnRationale call with
@@ -432,7 +451,7 @@ public class JavaFileBuilder {
         if (onRationale != null) {
             addShouldShowRequestPermissionRationaleCondition(builder, targetParam, permissionField,
                     true, element.getClassType());
-            if (hasParameters) {
+            if (!hasParameters) {
                 // For methods with parameters, use the PermissionRequest instantiated above
                 builder.addStatement("$N.$N($N)", targetParam, onRationale.getSimpleName().toString(),
                         ProcessorUtil.pendingRequestFieldName(needsMethod));
@@ -460,11 +479,11 @@ public class JavaFileBuilder {
     }
 
 
-    private static List<FieldSpec> createFields(List<ExecutableElement> needsPermissionsMethods,
-                                                TypeResolver typeResolver) {
+    private static List<FieldSpec> createFields(List<ExecutableElement> needsPermissionsMethods) {
         List<FieldSpec> fields = new ArrayList<>();
         int index = 0;
         for (ExecutableElement element : needsPermissionsMethods) {
+            // For each method annotated with @NeedsPermission, add REQUEST integer and PERMISSION String[] fields
             fields.add(createRequestCodeField(requestCodeFieldName(element), index));
 
             String[] value = element.getAnnotation(NeedsPermission.class).value();
@@ -473,13 +492,14 @@ public class JavaFileBuilder {
             if (!element.getParameters().isEmpty()) {
                 fields.add(createPendingRequestField(element));
             }
+            index++;
         }
         return fields;
     }
 
     private static FieldSpec createPendingRequestField(ExecutableElement element) {
 
-        return FieldSpec.builder(ClassName.get("permissions.dispatcher", "GrantableRequest"),
+        return FieldSpec.builder(ClassName.get("org.jokar.permissiondispatcher.library", "GrantableRequest"),
                 ConstantsProvider.GEN_PENDING_PREFIX + element.getSimpleName().toString().toUpperCase())
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .build();
@@ -528,6 +548,7 @@ public class JavaFileBuilder {
     }
 
     private static boolean hasNormalPermission(RuntimePermissionsElement element) {
+
         List<ExecutableElement> needsPermissionsMethods = element.getNeedsPermissionsMethods();
         for (ExecutableElement executableElement : needsPermissionsMethods) {
             List<String> permissionValue = getValueFromAnnotation(executableElement, NeedsPermission.class);

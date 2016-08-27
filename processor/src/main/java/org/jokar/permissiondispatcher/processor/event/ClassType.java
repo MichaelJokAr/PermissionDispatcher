@@ -19,7 +19,6 @@ public enum ClassType {
 
     public static ClassType getClassType(String className, TypeResolver resolver) {
         if (resolver.isSubTypeOf(className, ConstantsProvider.ACTIVITY)) {
-
             return ACTIVITY;
         } else if (resolver.isSubTypeOf(className, ConstantsProvider.V4FRAGMENT)) {
             return V4FRAGMENT;
