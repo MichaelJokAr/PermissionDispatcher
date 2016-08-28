@@ -32,13 +32,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button2.setOnClickListener(this);
     }
 
-    @NeedsPermission(Manifest.permission.WRITE_SETTINGS)
+    @NeedsPermission(Manifest.permission.CAMERA)
     void takeCamera(String url) {
         Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
     }
 
     //
-    @OnShowRationale(Manifest.permission.WRITE_SETTINGS)
+    @OnShowRationale(Manifest.permission.CAMERA)
     void ohowRationaleTakeCamera(final PermissionRequest request) {
 
         showRationDialog(request,"Request Camera");
@@ -64,12 +64,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     //
-    @OnPermissionDenied(Manifest.permission.WRITE_SETTINGS)
+    @OnPermissionDenied(Manifest.permission.CAMERA)
     void onDeniedTakeCamera() {
         Toast.makeText(getApplicationContext(), "Camera Denied", Toast.LENGTH_SHORT).show();
     }
 
-    @OnNeverAskAgain(Manifest.permission.WRITE_SETTINGS)
+    @OnNeverAskAgain(Manifest.permission.CAMERA)
     void onNeverAskTakeCamera() {
         Toast.makeText(getApplicationContext(), "Camera NeverAsk", Toast.LENGTH_SHORT).show();
     }

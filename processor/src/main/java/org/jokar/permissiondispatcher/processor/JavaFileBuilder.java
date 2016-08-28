@@ -15,24 +15,22 @@ import org.jokar.permissiondispatcher.processor.event.ClassType;
 import org.jokar.permissiondispatcher.processor.event.ConstantsProvider;
 import org.jokar.permissiondispatcher.processor.event.TypeResolver;
 import org.jokar.permissiondispatcher.processor.helper.SensitivePermissionInterface;
-import org.jokar.permissiondispatcher.processor.helper.SystemAlertWindowHelper;
-import org.jokar.permissiondispatcher.processor.helper.WriteSettingsHelper;
 import org.jokar.permissiondispatcher.processor.utils.ProcessorUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
-//import static java.util.Arrays.deepEquals;
 
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.requestCodeFieldName;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.permissionFieldName;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.varargsParametersCodeBlock;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.getValueFromAnnotation;
 import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.withCheckMethodName;
+import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.containsKey;
+import static org.jokar.permissiondispatcher.processor.utils.ProcessorUtil.getSensitivePermission;
 
 /**
  * Created by JokAr on 16/8/24.
@@ -41,14 +39,12 @@ public class JavaFileBuilder {
     protected static ClassName PERMISSION_UTILS = ClassName.get("org.jokar.permissiondispatcher.library", "PermissionUtils");
     private static ClassName ACTIVITY_COMPAT = ClassName.get("android.support.v4.app", "ActivityCompat");
     private static String[] MANIFEST_WRITE_SETTING = new String[]{"android.permission.WRITE_SETTINGS"};
-    private static String MANIFEST_SYSTEM_ALERT_WINDOW[] = new String[]{"android.permission.SYSTEM_ALERT_WINDOW"};
-    private static HashMap<String[], SensitivePermissionInterface> ADD_WITH_CHECK_BODY_MAP =
-            new HashMap<String[], SensitivePermissionInterface>();
+    private static String[] MANIFEST_SYSTEM_ALERT_WINDOW = new String[]{"android.permission.SYSTEM_ALERT_WINDOW"};
+    private static List<String[]> ADD_WITH_CHECK_BODY_MAP = new ArrayList<>();
 
     static {
-        ADD_WITH_CHECK_BODY_MAP.put(MANIFEST_WRITE_SETTING, new WriteSettingsHelper());
-        ADD_WITH_CHECK_BODY_MAP.put(MANIFEST_SYSTEM_ALERT_WINDOW, new SystemAlertWindowHelper());
-
+        ADD_WITH_CHECK_BODY_MAP.add(MANIFEST_WRITE_SETTING);
+        ADD_WITH_CHECK_BODY_MAP.add(MANIFEST_SYSTEM_ALERT_WINDOW);
     }
 
     /**
@@ -170,26 +166,16 @@ public class JavaFileBuilder {
         String requestCodeField = ProcessorUtil.requestCodeFieldName(needsMethod);
         String[] value = needsMethod.getAnnotation(NeedsPermission.class).value();
 
-//        SensitivePermissionInterface sensitivePermissionInterface;
-//        if(deepEquals(value,MANIFEST_WRITE_SETTING)){
-//            sensitivePermissionInterface = new WriteSettingsHelper();
-//            sensitivePermissionInterface.addRequestPermissionsStatement(proceedMethod,
-//                    element.getClassType().getActivity(), requestCodeField);
-//        }else if(deepEquals(value,MANIFEST_SYSTEM_ALERT_WINDOW)){
-//            sensitivePermissionInterface = new SystemAlertWindowHelper();
-//            sensitivePermissionInterface.addRequestPermissionsStatement(proceedMethod,
-//                    element.getClassType().getActivity(), requestCodeField);
-//        }else {
-//            addRequestPermissionsStatement(proceedMethod, targetParam, permissionFieldName(needsMethod), requestCodeField, element.getClassType());
-//
-//        }
-        if (ADD_WITH_CHECK_BODY_MAP.get(value) != null) {
-            SensitivePermissionInterface sensitivePermissionInterface = ADD_WITH_CHECK_BODY_MAP.get(value);
+
+        SensitivePermissionInterface sensitivePermissionInterface = getSensitivePermission(ADD_WITH_CHECK_BODY_MAP, value);
+        if (sensitivePermissionInterface != null) {
             sensitivePermissionInterface.addRequestPermissionsStatement(proceedMethod,
                     element.getClassType().getActivity(), requestCodeField);
         } else {
-            addRequestPermissionsStatement(proceedMethod, targetParam, permissionFieldName(needsMethod), requestCodeField, element.getClassType());
+            addRequestPermissionsStatement(proceedMethod, targetParam, permissionFieldName(needsMethod),
+                    requestCodeField, element.getClassType());
         }
+
 
         builder.addMethod(proceedMethod.build());
 
@@ -250,7 +236,7 @@ public class JavaFileBuilder {
         List<ExecutableElement> needsPermissionsMethods = rpe.getNeedsPermissionsMethods();
         for (ExecutableElement element : needsPermissionsMethods) {
             String[] needsPermissionParameter = element.getAnnotation(NeedsPermission.class).value();
-            if (!ADD_WITH_CHECK_BODY_MAP.containsKey(needsPermissionParameter)) {
+            if (!containsKey(ADD_WITH_CHECK_BODY_MAP,needsPermissionParameter)) {
                 continue;
             }
 
@@ -285,7 +271,7 @@ public class JavaFileBuilder {
         for (ExecutableElement needsMethod : needsPermissionsMethods) {
             String[] needsPermissionParameter = needsMethod.getAnnotation(NeedsPermission.class).value();
 
-            if (ADD_WITH_CHECK_BODY_MAP.containsKey(needsPermissionParameter)) {
+            if (containsKey(ADD_WITH_CHECK_BODY_MAP,needsPermissionParameter)) {
                 continue;
             }
 
@@ -315,7 +301,7 @@ public class JavaFileBuilder {
         ExecutableElement onDenied = rpe.findOnDeniedForNeeds(needsPermissionParameter);
         boolean hasDenied = onDenied != null;
         String permissionField = ProcessorUtil.permissionFieldName(needsMethod);
-        if (!ADD_WITH_CHECK_BODY_MAP.containsKey(needsPermissionParameter)) {
+        if (!containsKey(ADD_WITH_CHECK_BODY_MAP,needsPermissionParameter)) {
             builder.beginControlFlow("if ($T.getTargetSdkVersion($N) < 23 && !$T.hasSelfPermissions($N, $N))",
                     PERMISSION_UTILS, rpe.getClassType().getActivity(), PERMISSION_UTILS, rpe.getClassType().getActivity(), permissionField);
             if (hasDenied) {
@@ -325,9 +311,10 @@ public class JavaFileBuilder {
             builder.endControlFlow();
         }
         // Add the conditional for "permission verified"
-        if (ADD_WITH_CHECK_BODY_MAP.get(needsPermissionParameter) != null) {
-            SensitivePermissionInterface sensitivePermissionInterface = ADD_WITH_CHECK_BODY_MAP.get(needsPermissionParameter);
-            sensitivePermissionInterface.addHasSelfPermissionsCondition(builder, rpe.getClassType().getActivity(), permissionField);
+        SensitivePermissionInterface sensitivePermissionInterface = getSensitivePermission(ADD_WITH_CHECK_BODY_MAP,needsPermissionParameter);
+        if (sensitivePermissionInterface != null) {
+            sensitivePermissionInterface.addHasSelfPermissionsCondition(builder, rpe.getClassType()
+                    .getActivity(), permissionField);
         } else {
             builder.beginControlFlow("if ($T.verifyPermissions($N))", PERMISSION_UTILS, grantResultsParam);
         }
@@ -413,9 +400,8 @@ public class JavaFileBuilder {
         // Add the conditional for when permission has already been granted
         String[] needsPermissionParameter = needsMethod.getAnnotation(NeedsPermission.class).value();
         String activityVar = element.getClassType().getActivity();
-
-        if (ADD_WITH_CHECK_BODY_MAP.get(needsPermissionParameter) != null) {
-            SensitivePermissionInterface sensitivePermissionInterface = ADD_WITH_CHECK_BODY_MAP.get(needsPermissionParameter);
+        SensitivePermissionInterface sensitivePermissionInterface = getSensitivePermission(ADD_WITH_CHECK_BODY_MAP,needsPermissionParameter);
+        if (sensitivePermissionInterface != null) {
 
             sensitivePermissionInterface.addHasSelfPermissionsCondition(builder, activityVar, permissionField);
         } else {
@@ -464,11 +450,12 @@ public class JavaFileBuilder {
         }
 
         // Add the branch for "request permission"
-        if (ADD_WITH_CHECK_BODY_MAP.get(needsPermissionParameter) != null) {
-            SensitivePermissionInterface sensitivePermissionInterface = ADD_WITH_CHECK_BODY_MAP.get(needsPermissionParameter);
+        SensitivePermissionInterface sensitivePermissionInterface1 = getSensitivePermission(ADD_WITH_CHECK_BODY_MAP,needsPermissionParameter);
+        if (sensitivePermissionInterface1 != null) {
             sensitivePermissionInterface.addRequestPermissionsStatement(builder, activityVar, requestCodeField);
         } else {
-            addRequestPermissionsStatement(builder, targetParam, permissionField, requestCodeField, element.getClassType());
+            addRequestPermissionsStatement(builder, targetParam, permissionField, requestCodeField,
+                    element.getClassType());
         }
         if (onRationale != null) {
             builder.endControlFlow();

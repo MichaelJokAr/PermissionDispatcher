@@ -10,9 +10,13 @@ import org.jokar.permissiondispatcher.annotation.RuntimePermissions;
 import org.jokar.permissiondispatcher.processor.RuntimePermissionsElement;
 import org.jokar.permissiondispatcher.processor.event.ConstantsProvider;
 import org.jokar.permissiondispatcher.processor.event.TypeResolver;
+import org.jokar.permissiondispatcher.processor.helper.SensitivePermissionInterface;
+import org.jokar.permissiondispatcher.processor.helper.SystemAlertWindowHelper;
+import org.jokar.permissiondispatcher.processor.helper.WriteSettingsHelper;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -179,5 +183,33 @@ public final class ProcessorUtil {
 
     public static String withCheckMethodName(ExecutableElement element) {
         return element.getSimpleName().toString() + ConstantsProvider.METHOD_SUFFIX;
+    }
+
+    public static boolean containsKey(List<String[]> ADD_WITH_CHECK_BODY_MAP, String[] value) {
+        for(String[] strings: ADD_WITH_CHECK_BODY_MAP){
+            if(Arrays.equals(strings,value)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static SensitivePermissionInterface getSensitivePermission(List<String[]> ADD_WITH_CHECK_BODY_MAP,
+                                                                      String[] value) {
+        if (containsKey(ADD_WITH_CHECK_BODY_MAP, value)) {
+            SensitivePermissionInterface permissionInterface;
+            String[] MANIFEST_WRITE_SETTING = new String[]{"android.permission.WRITE_SETTINGS"};
+            String MANIFEST_SYSTEM_ALERT_WINDOW[] = new String[]{"android.permission.SYSTEM_ALERT_WINDOW"};
+
+            if (deepEquals(MANIFEST_WRITE_SETTING, value)) {
+                permissionInterface = new WriteSettingsHelper();
+                return permissionInterface;
+            } else if (deepEquals(MANIFEST_SYSTEM_ALERT_WINDOW, value)) {
+                permissionInterface = new SystemAlertWindowHelper();
+                return permissionInterface;
+            }
+        }
+        return null;
+
     }
 }
