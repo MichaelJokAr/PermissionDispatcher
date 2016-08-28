@@ -121,11 +121,6 @@ dependencies {
   apt 'org.jokar:permissiondispatcher-processor:${latest.version}'
 }
 
-repositories {
-    maven {
-        url 'https://dl.bintray.com/a10188755550/maven' 
-    }
-}
 ```
 
 ## Licence
