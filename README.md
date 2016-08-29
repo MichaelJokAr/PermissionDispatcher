@@ -91,7 +91,7 @@ Check out the [sample](https://github.com/a1018875550/PermissionDispatcher/tree/
 - You can use this library with JDK 1.6 or up, but we test library's behaviour on the JDK 1.8 because it has been becoming the default of Android development.
 
 ### Fragment Support
-PermissionsDispatcher is supported on **API levels 9 and up**(Because I use the version of 'support-v4'is 24 and  the Android API is 24 too ),with which you get support for annotating `android.app.Activity` and `android.support.v4.app.Fragment` sub-classes out of the box.
+PermissionsDispatcher is supported on **API levels 4 and up** ,with which you get support for annotating `android.app.Activity` and `android.support.v4.app.Fragment` sub-classes out of the box.
 
 In case you rely on `android.app.Fragment` in your app, you can use these with PermissionsDispatcher as well!
 

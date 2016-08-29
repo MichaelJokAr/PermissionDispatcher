@@ -119,7 +119,7 @@ public class PermissionUtils {
 
 
     /**
-     * "Xiaomi" phione is different others,need add AppOpsManager
+     * "Xiaomi" phone is different others,need add AppOpsManager
      * @param context
      * @param permission
      * @return
@@ -127,7 +127,11 @@ public class PermissionUtils {
     @TargetApi(23)
     private static boolean checkSelfPermissionForXiaomi(Context context, String permission) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
+            try {
+                return checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
+            } catch (RuntimeException t) {
+                return false;
+            }
         }
         int auth = ActivityCompat.checkSelfPermission(context, permission);
 

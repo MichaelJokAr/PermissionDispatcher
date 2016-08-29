@@ -26,7 +26,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile project(':library')
     apt project(':processor')
-//    compile 'org.jokar:permissiondispatcher:2.0.6'
+//    compile 'org.jokar:permissiondispatcher:2.0.7'
 //    apt 'org.jokar:permissiondispatcher-processor:2.0.6'
 }
 //repositories {

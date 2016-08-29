@@ -1,0 +1,3 @@
+./gradlew library:bintrayUpload -PbintrayUser=a10188755550 -PbintrayKey=771a287d2d3aaa03339a5e8da396012796543a9c -PdryRun=false
+
+./gradlew processor:bintrayUpload -PbintrayUser=a10188755550 -PbintrayKey=771a287d2d3aaa03339a5e8da396012796543a9c -PdryRun=false

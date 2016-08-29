@@ -2,14 +2,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 4
+        targetSdkVersion 23
     }
     sourceSets {
         main {
@@ -24,9 +22,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:support-compat:24.2.0'
-    compile 'com.android.support:support-core-utils:24.2.0'
-    compile 'com.android.support:support-fragment:24.2.0'
+    compile "com.android.support:support-v4:$SUPPORT_LIBRARY_VERSION"
 }
 
 publish {

@@ -2,6 +2,9 @@ package org.jokar.permissiondispatcher;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -34,17 +37,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @NeedsPermission(Manifest.permission.CAMERA)
     void takeCamera(String url) {
-        Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
+        // 跳转到系统照相机
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(cameraIntent);
+        }
     }
 
     //
     @OnShowRationale(Manifest.permission.CAMERA)
     void ohowRationaleTakeCamera(final PermissionRequest request) {
 
-        showRationDialog(request,"Request Camera");
+        showRationDialog(request, "Request Camera");
     }
 
-    private void showRationDialog(final PermissionRequest request,String message) {
+    private void showRationDialog(final PermissionRequest request, String message) {
         new AlertDialog.Builder(this)
                 .setTitle("RequestPermission")
                 .setMessage(message)
@@ -81,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @OnShowRationale({Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS})
     void showRationaleForContact(PermissionRequest request) {
-        showRationDialog(request,"Request Contacts");
+        showRationDialog(request, "Request Contacts");
     }
 
     @Override
