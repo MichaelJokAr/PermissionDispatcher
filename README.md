@@ -1,8 +1,10 @@
 ##PermissionDispatcher
 
-rewrite the <a href="https://github.com/hotchemi/PermissionsDispatcher">PermissionsDispatcher<a/> for Java
-and add code for "Xiaomi" phone;
+rewrite the <a href="https://github.com/hotchemi/PermissionsDispatcher">PermissionsDispatcher<a/> to Java and add code for "Xiaomi" phone;
 
+![image](https://raw.githubusercontent.com/hotchemi/PermissionsDispatcher/master/art/logo.png)
+
+PermissionsDispatcher provides a simple annotation-based API to handle runtime permissions in Android Marshmallow.
 ## Usage # [中文版](http://blog.csdn.net/a1018875550/article/details/51525438)
 
 Here's a minimum example, in which we register a `MainActivity` which requires `Manifest.permission.CAMERA`.
@@ -122,6 +124,11 @@ dependencies {
 }
 
 ```
+
+## Thanks
+
+[@hotchemi](https://github.com/hotchemi) 
+
 
 ## Licence
 
