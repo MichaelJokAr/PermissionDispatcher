@@ -2,6 +2,8 @@
 
 rewrite the <a href="https://github.com/hotchemi/PermissionsDispatcher">PermissionsDispatcher<a/> to Java and add code for "Xiaomi" phone;
 
+PermissionDispatcher provides a simple annotation-based API to handle runtime permissions in Android Marshmallow.
+
 this libray only add judgment for "Xiaomi" phone,and not support fragment-v13;If you don't  need support  "Xiaomi" phone please choose this library<a href="https://github.com/hotchemi/PermissionsDispatcher">PermissionsDispatcher<a/>,it's better this;
 ## Usage # [中文版](http://blog.csdn.net/a1018875550/article/details/51525438)
 
