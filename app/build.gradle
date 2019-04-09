@@ -1,14 +1,12 @@
 apply plugin: 'com.android.application'
-apply plugin: 'android-apt'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 26
 
     defaultConfig {
         applicationId "org.jokar.permissiondispatcher"
-        minSdkVersion 9
-        targetSdkVersion 24
+        minSdkVersion 15
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -21,16 +19,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile project(':library')
-    apt project(':processor')
-//    compile 'org.jokar:permissiondispatcher:2.0.7'
-//    apt 'org.jokar:permissiondispatcher-processor:2.0.6'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    implementation "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
+    implementation project(':library')
+    annotationProcessor project(':processor')
 }
-//repositories {
-//    maven {
-//        url 'https://dl.bintray.com/a10188755550/maven' //指定自己的maven路径，在未将library加入的jcenter中前，这是必须的
-//    }
-//}

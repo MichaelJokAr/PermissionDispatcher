@@ -8,6 +8,6 @@ import javax.lang.model.element.ExecutableElement;
 public class PrivateMethodException extends RuntimeException {
 
     public PrivateMethodException(ExecutableElement element,Class clazz) {
-        super("Method '"+element.getSimpleName().toString()+"()' annotated with '@"+clazz.getSimpleName().toString()+"' must not be private");
+        super("Method '"+element.getSimpleName().toString()+"()' annotated with '@"+ clazz.getSimpleName() +"' must not be private");
     }
 }

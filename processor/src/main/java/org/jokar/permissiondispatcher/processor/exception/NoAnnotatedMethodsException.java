@@ -8,6 +8,6 @@ import org.jokar.permissiondispatcher.processor.RuntimePermissionsElement;
 public class NoAnnotatedMethodsException extends RuntimeException {
 
     public NoAnnotatedMethodsException(RuntimePermissionsElement element,Class clazz) {
-        super("Annotated class '"+element.getClassName()+"' doesn't have any method annotated with '@"+clazz.getSimpleName().toString()+"'");
+        super("Annotated class '"+element.getClassName()+"' doesn't have any method annotated with '@"+ clazz.getSimpleName() +"'");
     }
 }
